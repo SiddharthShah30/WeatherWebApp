@@ -33,11 +33,20 @@ const regionLoadBtn = document.getElementById("regionLoadBtn");
 const regionSummary = document.getElementById("regionSummary");
 const regionGrid = document.getElementById("regionGrid");
 const alertsList = document.getElementById("alertsList");
+const ribbonFeels = document.getElementById("ribbonFeels");
+const ribbonWind = document.getElementById("ribbonWind");
+const ribbonHumidity = document.getElementById("ribbonHumidity");
+const ribbonVisibility = document.getElementById("ribbonVisibility");
+const ribbonAqi = document.getElementById("ribbonAqi");
+const ribbonUv = document.getElementById("ribbonUv");
 
 let map;
 let markersLayer;
 let currentMarker;
 let lastContext = null;
+let lastAqi = null;
+let lastUvMax = null;
+let lastAlerts = [];
 
 let units = "metric";
 const storedUnits = localStorage.getItem("units");
@@ -102,6 +111,13 @@ function setThemeByTemp(temp, isNight) {
   }
 }
 
+function updateRibbon(context) {
+  ribbonFeels.textContent = `Feels ${Math.round(context.feels)}°${unitLabel()}`;
+  ribbonWind.textContent = `Wind ${context.wind.toFixed(1)} ${windLabel()}`;
+  ribbonHumidity.textContent = `Humidity ${context.humidity}%`;
+  ribbonVisibility.textContent = `Visibility ${formatDistance(context.visibility)}`;
+}
+
 function setLoadingState(message) {
   setStatus(message);
   buildCard(tempCard, "Temp", "--", "Loading");
@@ -124,6 +140,12 @@ function setLoadingState(message) {
   activityList.innerHTML = "";
   forecastStrip.innerHTML = "";
   climateStrip.innerHTML = "";
+  ribbonFeels.textContent = "Feels --";
+  ribbonWind.textContent = "Wind --";
+  ribbonHumidity.textContent = "Humidity --";
+  ribbonVisibility.textContent = "Visibility --";
+  ribbonAqi.textContent = "Air --";
+  ribbonUv.textContent = "UV --";
 }
 
 function formatTime(timestamp, timezoneOffset) {
@@ -419,8 +441,14 @@ async function applyAirQuality(lat, lon) {
     const data = await fetchAir(lat, lon);
     const aqi = data.list && data.list[0] ? data.list[0].main.aqi : null;
     buildCard(aqiCard, "Air", aqiLabel(aqi), "AQI");
+    lastAqi = aqi;
+    ribbonAqi.textContent = `Air ${aqiLabel(aqi)}`;
+    updateAlerts();
   } catch (error) {
     buildCard(aqiCard, "Air", "n/a", "AQI");
+    lastAqi = null;
+    ribbonAqi.textContent = "Air n/a";
+    updateAlerts();
   }
 }
 
@@ -556,13 +584,17 @@ function applyWeather(data) {
 
   lastContext = {
     temp,
+    feels,
     wind,
     humidity,
+    visibility,
     precipValue,
     condition,
     isNight
   };
   renderActivities(lastContext, null);
+  updateRibbon(lastContext);
+  updateAlerts();
 
   setCurrentMarker(current.coord.lat, current.coord.lon, current.name);
   applyAirQuality(current.coord.lat, current.coord.lon);
@@ -573,14 +605,24 @@ function applyWeather(data) {
         ? data.uv_max.toFixed(1)
         : "n/a";
       buildCard(uvCard, "UV", uvValue, "Max today");
-      renderAlerts(data.alerts || []);
+      lastUvMax = data.uv_max;
+      ribbonUv.textContent = `UV ${uvValue}`;
+      lastAlerts = (data.alerts || []).map(alert => ({
+        title: "Advisory",
+        note: alert,
+        level: "level-low"
+      }));
+      updateAlerts();
       if (lastContext) {
         renderActivities(lastContext, data.uv_max);
       }
     })
     .catch(() => {
       buildCard(uvCard, "UV", "n/a", "Max today");
-      renderAlerts([]);
+      lastUvMax = null;
+      ribbonUv.textContent = "UV n/a";
+      lastAlerts = [];
+      updateAlerts();
       if (lastContext) {
         renderActivities(lastContext, null);
       }
