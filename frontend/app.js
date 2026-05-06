@@ -2,6 +2,7 @@ const cityInput = document.getElementById("cityInput");
 const searchBtn = document.getElementById("searchBtn");
 const geoBtn = document.getElementById("geoBtn");
 const unitButtons = document.querySelectorAll(".unit-btn");
+const pageBody = document.body;
 
 const tempCard = document.getElementById("tempCard");
 const feelsCard = document.getElementById("feelsCard");
@@ -73,6 +74,31 @@ function setStatus(message, type) {
   statusMsg.classList.remove("ok", "error");
   if (type) {
     statusMsg.classList.add(type);
+  }
+}
+
+function setThemeByTemp(temp, isNight) {
+  pageBody.classList.remove("weather-hot", "weather-cold", "weather-mild", "weather-night");
+  if (isNight) {
+    pageBody.classList.add("weather-night");
+    return;
+  }
+  if (units === "metric") {
+    if (temp >= 28) {
+      pageBody.classList.add("weather-hot");
+    } else if (temp <= 8) {
+      pageBody.classList.add("weather-cold");
+    } else {
+      pageBody.classList.add("weather-mild");
+    }
+  } else {
+    if (temp >= 82) {
+      pageBody.classList.add("weather-hot");
+    } else if (temp <= 46) {
+      pageBody.classList.add("weather-cold");
+    } else {
+      pageBody.classList.add("weather-mild");
+    }
   }
 }
 
@@ -524,6 +550,7 @@ function applyWeather(data) {
     stageCondition = "cloudy";
   }
   setWeatherStage(stageCondition, isNight);
+  setThemeByTemp(temp, isNight);
   renderForecast(forecast.list);
   renderClimate(forecast.list, forecast.city.timezone || 0);
 

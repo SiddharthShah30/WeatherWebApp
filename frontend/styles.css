@@ -18,6 +18,23 @@ body {
   color: var(--black);
 }
 
+body.weather-hot {
+  background: radial-gradient(circle at 20% 20%, #f8b26a 0%, #f4c98b 40%, #f2d7a5 100%);
+}
+
+body.weather-cold {
+  background: radial-gradient(circle at 20% 20%, #b7d5f0 0%, #d5e7f6 45%, #eef4fb 100%);
+}
+
+body.weather-mild {
+  background: radial-gradient(circle at 20% 20%, #cbe6b3 0%, #e4f0c9 45%, #f2f5e9 100%);
+}
+
+body.weather-night {
+  background: radial-gradient(circle at 20% 20%, #1b2336 0%, #232b40 45%, #2a324a 100%);
+  color: #f7f5ef;
+}
+
 .shell {
   max-width: 1200px;
   margin: 0 auto;
@@ -495,10 +512,61 @@ body {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: activityIn 400ms ease forwards;
 }
 
 .activity-item strong {
   text-transform: uppercase;
+}
+
+.activity-item:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.activity-item:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+.activity-item:nth-child(4) {
+  animation-delay: 240ms;
+}
+
+.activity-item:nth-child(5) {
+  animation-delay: 320ms;
+}
+
+body.weather-night .metric-card,
+body.weather-night .poster-panel,
+body.weather-night .activity-panel,
+body.weather-night .forecast-panel,
+body.weather-night .climate-panel,
+body.weather-night .alerts-panel,
+body.weather-night .map-wrap,
+body.weather-night .world-side,
+body.weather-night .region-card,
+body.weather-night .forecast-card,
+body.weather-night .climate-card,
+body.weather-night .activity-item {
+  background: #1b2234;
+  color: #f7f5ef;
+  border-color: #f7f5ef;
+}
+
+body.weather-night .region-controls select,
+body.weather-night .region-controls button,
+body.weather-night .controls input,
+body.weather-night .controls button,
+body.weather-night .unit-toggle {
+  border-color: #f7f5ef;
+}
+
+@keyframes activityIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .forecast-panel {
